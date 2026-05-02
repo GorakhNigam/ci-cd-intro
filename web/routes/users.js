@@ -7,5 +7,3 @@ router.get('/users', function (req, res, next) {
 })
 
 module.exports = router
-
-
