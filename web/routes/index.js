@@ -5,8 +5,6 @@ const router = express.Router()
 router.get('/', function (req, res, next) {
   res.render('index', { title: 'Nimble-ICE' })
 })
-
-
 /* GET ice-flakes resource */
 router.get('/ice-flakes', function (req, res, next) {
   res
@@ -17,5 +15,4 @@ router.get('/ice-flakes', function (req, res, next) {
       shape: 'circle'
     })
 })
-
 module.exports = router
