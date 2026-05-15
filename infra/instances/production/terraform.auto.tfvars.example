@@ -1,2 +1,5 @@
-base_ami_id                 = "ami-0cabd..........d35d"
-production_public_key       = "ssh-rsa ..........redacted........+q4MTsVqkAXcz6UWWayKIc1PWJVBk8QtvCcQ== ubuntu@production"
+base_image_id        = "/subscriptions/<SUBSCRIPTION_ID>/resourceGroups/<RG_NAME>/providers/Microsoft.Compute/images/<IMAGE_NAME>"
+location             = "eastus"
+resource_group_name  = "ci-cd-production-rg"
+admin_username       = "azureuser"
+production_public_key = "ssh-rsa ..........redacted........ azureuser@production"

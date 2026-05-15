@@ -1,2 +1,5 @@
-base_ami_id                 = "ami-0cabd..........d35d"
-staging_public_key          = "ssh-rsa ..........redacted........+q4MTsVqkAXcz6UWWayKIc1PWJVBk8QtvCcQ== ubuntu@staging"
+base_image_id        = "/subscriptions/<SUBSCRIPTION_ID>/resourceGroups/<RG_NAME>/providers/Microsoft.Compute/images/<IMAGE_NAME>"
+location             = "eastus"
+resource_group_name  = "ci-cd-staging-rg"
+admin_username       = "azureuser"
+staging_public_key   = "ssh-rsa ..........redacted........ azureuser@staging"

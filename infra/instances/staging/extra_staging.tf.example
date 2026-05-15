@@ -1,5 +1,5 @@
 #
-# This is a template for creating on-demand staging EC2 instances. 
+# This is a template for creating on-demand staging Azure VMs.
 # this file relies on resources defined in main.tf and cannot be used standalone.
 # ensure that the random id placeholder is replaced with a unique identifier 
 # in every copy of this file otherwise new resouces will NOT be created.
@@ -10,26 +10,60 @@
 #
 resource "random_id" "server_RANDOMID" {
   keepers = {
-    # Generate a new id each time we switch to a new AMI id
-    ami_id = "${var.base_ami_id}"
+    # Generate a new id each time we switch to a new image id
+    image_id = "${var.base_image_id}"
   }
 
   byte_length = 8
 }
 
-resource "aws_instance" "staging_cicd_demo_RANDOMID" {
-  # Read the AMI id "through" the random_id resource to ensure that
-  # both will change together.
-  ami                    = random_id.server_RANDOMID.keepers.ami_id
-  instance_type          = "t2.micro"
-  vpc_security_group_ids = ["sg-0d2411db69a112a30"]
-  key_name               = aws_key_pair.staging_key.key_name
+resource "azurerm_public_ip" "staging_RANDOMID" {
+  name                = "staging-pip-${random_id.server_RANDOMID.hex}"
+  location            = azurerm_resource_group.staging.location
+  resource_group_name = azurerm_resource_group.staging.name
+  allocation_method   = "Static"
+}
 
-  tags = {
-    "Name" = "staging_cicd_demo-RANDOMID"
+resource "azurerm_network_interface" "staging_RANDOMID" {
+  name                = "staging-nic-${random_id.server_RANDOMID.hex}"
+  location            = azurerm_resource_group.staging.location
+  resource_group_name = azurerm_resource_group.staging.name
+
+  ip_configuration {
+    name                          = "primary"
+    subnet_id                     = azurerm_subnet.staging.id
+    private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = azurerm_public_ip.staging_RANDOMID.id
   }
 }
 
-output "staging_dns_RANDOMID" {
-  value = aws_instance.staging_cicd_demo_RANDOMID.public_dns
+resource "azurerm_network_interface_security_group_association" "staging_RANDOMID" {
+  network_interface_id      = azurerm_network_interface.staging_RANDOMID.id
+  network_security_group_id = azurerm_network_security_group.staging.id
+}
+
+resource "azurerm_linux_virtual_machine" "staging_cicd_demo_RANDOMID" {
+  name                = "staging-cicd-${random_id.server_RANDOMID.hex}"
+  resource_group_name = azurerm_resource_group.staging.name
+  location            = azurerm_resource_group.staging.location
+  size                = "Standard_B1s"
+  admin_username      = var.admin_username
+  network_interface_ids = [
+    azurerm_network_interface.staging_RANDOMID.id
+  ]
+  source_image_id = var.base_image_id
+
+  admin_ssh_key {
+    username   = var.admin_username
+    public_key = var.staging_public_key
+  }
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+}
+
+output "staging_public_ip_RANDOMID" {
+  value = azurerm_public_ip.staging_RANDOMID.ip_address
 }
